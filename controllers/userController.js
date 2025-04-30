@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt";
+import { config } from "dotenv";
 import jwt from "jsonwebtoken";
+import validator from "validator";
 import User from "../models/userModel.js";
+
+config();
 
 export const register = async (req, res) => {
   try {
@@ -10,6 +14,11 @@ export const register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
+    }
+    
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ error: "Please enter valid Email" });
+        
     }
 
     //hash the password
@@ -33,6 +42,8 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log({email,password});
+    
 
     //check if user exists
     const user = await User.findOne({ email });
@@ -136,7 +147,7 @@ export const updateProfilePic = async (req, res) => {
     const updateUser = await User.findByIdAndUpdate(
       req.user.id,
       {
-        avatar: req.file.path,
+        image: req.file.path,
       },
       { new: true }
     );
@@ -207,3 +218,33 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ error: "There was an error in server side" });
   }
 };
+
+//adminLogin
+export const adminLogin=async(req,res)=>{
+  try {
+    const {email,password}=req.body;
+
+    if (!email || !password) {
+     return res.status(400).json({ error: "pleasee provide email and password" });
+
+    }
+    if (email===process.env.ADMIN_EMAIL && password===process.env.ADMIN_PASSWORD) {
+        //generate a token
+    const token = jwt.sign(email+password,
+      process.env.JWT_SECRET
+    );
+
+    res.cookie("jwt", token, { expiresIn: "30d", httpOnly: true });
+      return res.status(200).json({ message: "Admin Login Success" ,token});
+
+    }else{
+      return res.status(400).json({error:"Invalid Credentials"})
+    }
+
+  } catch (error) {
+    console.log(error);
+    
+    res.status(500).json({ error: "There was an error in server side" });
+
+  }
+}
