@@ -30,9 +30,18 @@ export const register = async (req, res) => {
     //save the user
     await newUser.save();
 
+    //generate a token
+    const token = jwt.sign(
+      { id: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.cookie("jwt", token, { expiresIn: "30d", httpOnly: true });
+
     res
       .status(201)
-      .json({ message: "User registered successfully", user: newUser });
+      .json({ message: "User registered successfully", user: newUser,token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -59,7 +68,7 @@ export const login = async (req, res) => {
 
     //generate a token
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );

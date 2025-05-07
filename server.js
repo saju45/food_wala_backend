@@ -4,9 +4,10 @@ import express from "express";
 import connectCloudinary from "./config/cloudinary.js";
 import connectDB from "./config/mongodb.js";
 
+import cartRouter from "./routes/cartRoute.js";
+import orderRoute from "./routes/orderRoute.js";
 import productRouter from "./routes/productRoute.js";
 import userRouter from "./routes/userRoute.js";
-
 config();
 const app=express();
 
@@ -18,6 +19,8 @@ app.use(cors());
 
 app.use("/users",userRouter);
 app.use("/products",productRouter);
+app.use("/cart",cartRouter);
+app.use("/order",orderRoute);
 
 app.get("/",(req,res)=>{
     res.send("hello shanawaj hossain")

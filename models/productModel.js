@@ -28,7 +28,6 @@ const productSchema = new mongoose.Schema(
     },
     sizes:{
       type:Array,
-      required:true
     },
     popular:{type:Boolean},
     // stock: {
